@@ -10,6 +10,7 @@
 
 void adminExistence();
 int adminLogin();
+void viewfarmers();
 void adminDashboard();
 
 #endif
