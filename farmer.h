@@ -1,6 +1,7 @@
 #ifndef FARMER_H
 #define FARMER_H
 
+#include "product.h"
 
 void addProduct();
 void viewMyProducts();
