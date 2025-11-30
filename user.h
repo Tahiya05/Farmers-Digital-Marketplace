@@ -2,12 +2,11 @@
 #define USER_H
 
 typedef struct {
-    int id;
-    char name[50];
-    char email[50];
+    char username[50];
+    char phonenum[50];
     char password[20];
     int type;
-    int status;
+    char status[20];
 } user;
 
 #endif
