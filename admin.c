@@ -18,7 +18,7 @@ void adminExistence(){
 
         fclose(fp);
 
-        printf("Default admin created!");
+        printf("Default admin created!\n");
         return;
     }
     fclose(fp);
@@ -41,7 +41,6 @@ int adminLogin(){
     while (fread(&u, sizeof(user), 1, fp)){
         if (u.type==0 && strcmp(u.username, username)==0 && strcmp(u.password, pass)==0){
             fclose(fp);
-            printf("\nLOGIN SUCCESSFUL!");
             return 1;
         }
     }
