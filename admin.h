@@ -11,6 +11,7 @@
 void adminExistence();
 int adminLogin();
 void viewfarmers();
+void viewconsumers();
 void adminDashboard();
 
 #endif
