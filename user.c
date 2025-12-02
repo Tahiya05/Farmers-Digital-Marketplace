@@ -38,7 +38,7 @@ void farmerRegister()
 
     u.type=1;
 
-    u.id=1
+    u.id=01001
 
     rewind(fp);
     while(fread(&temp, sizeof(user), 1, fp)){
