@@ -3,6 +3,35 @@
 
 #include "user.h"
 
+void farmerMenu()
+{
+    int choice;
+
+     while(1){
+        printf("\n");
+        printf("\t====== WELCOME FARMERS! ======\n");
+        printf("What would you like to do?\n");
+        printf("1. Sign up\n");
+        printf("2. Login\n");
+        printf("3. Back\n");
+        printf("======================================\n");
+        printf("Enter choice: ");
+        scanf("%d",&choice);
+
+
+    switch(choice){
+        case 1:farmerRegister();
+            break;
+        case 2: farmerLogin();
+            break;
+        case 3:
+             return;
+        default: printf("\nInvalid choice! Try again.\n");
+            break;
+    }
+  }
+}
+
 void farmerRegister()
 {
     FILE *fp=fopen("users.dat", "ab+");
@@ -14,7 +43,6 @@ void farmerRegister()
     user u,temp;
     char phone[20];
 
-    printf("\n");
     printf("\t===== FARMER REGISTRATION =====\n");
 
     printf("Enter your phone number: ");
@@ -31,6 +59,7 @@ void farmerRegister()
 
     strcpy(u.phonenum, phone);
 
+    printf("\nYour username should not contain any space e.g. \"ShobujMia\"/\"Rafiq_Uddin\"");
     printf("Enter Username: ");
     scanf("%s",u.username);
 
@@ -63,7 +92,6 @@ int farmerLogin()
     char name[20],password[20];
     user u;
 
-    printf("\n");
     printf("\t===== FARMER LOGIN =====\n");
 
     printf("Enter Username: ");
@@ -83,5 +111,31 @@ int farmerLogin()
     fclose(fp);
     return -1;
 
+}
+
+void consumerMenu()
+{
+    int choice;
+
+     while(1){
+        printf("\n");
+        printf("\t====== WELCOME CONSUMERS! ======\n");
+        printf("What would you like to do?\n");
+        printf("1. Sign up\n");
+        printf("2. Login\n");
+        printf("3. Back\n");
+        printf("======================================\n");
+        printf("Enter choice: ");
+        scanf("%d",&choice);
+
+
+    switch(choice){
+
+        case 3:
+             return;
+        default: printf("\nInvalid choice! Try again.\n");
+            break;
+    }
+  }
 }
 

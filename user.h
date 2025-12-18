@@ -9,7 +9,9 @@ typedef struct {
     int type;
 } user;
 
+void farmerMenu();
 void farmerRegister();
 int farmerLogin();
+void consumerMenu();
 
 #endif
