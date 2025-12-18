@@ -14,6 +14,7 @@ void farmerRegister()
     user u,temp;
     char phone[20];
 
+    printf("\n");
     printf("\t===== FARMER REGISTRATION =====\n");
 
     printf("Enter your phone number: ");
@@ -38,7 +39,7 @@ void farmerRegister()
 
     u.type=1;
 
-    u.id=01001
+    u.id=10001;
 
     rewind(fp);
     while(fread(&temp, sizeof(user), 1, fp)){
@@ -62,6 +63,7 @@ int farmerLogin()
     char name[20],password[20];
     user u;
 
+    printf("\n");
     printf("\t===== FARMER LOGIN =====\n");
 
     printf("Enter Username: ");

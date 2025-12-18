@@ -17,11 +17,10 @@ void adminDashboard()
         printf("4. View Transactions\n");
         printf("5. Generate Reports\n");
         printf("6. View Failed Login Logs\n");
-        printf("7. System Statistics\n");
-        printf("8. Logout\n");
+        printf("7. Logout\n");
         printf("======================================\n");
         printf("Enter choice: ");
-        printf("%d",&choice);
+        scanf("%d",&choice);
 
         switch(choice){
             case 1:
@@ -41,11 +40,8 @@ void adminDashboard()
                 break;
             case 6:
                 viewFailedAdminLogins();
-                break
-            case 7:
-                systemStats();
                 break;
-            case 8:
+            case 7:
                 printf("Logging out...\n");
                 return;
             default:
@@ -68,7 +64,7 @@ void reportsMenu()
         printf("5. Back\n");
         printf("======================================\n");
         printf("Enter choice: ");
-        printf("%d",&choice);
+        scanf("%d",&choice);
 
         switch(choice){
             case 1:
@@ -87,6 +83,7 @@ void reportsMenu()
                 return;
             default:
                 printf("Invalid choice! Try again.\n");
+        }
     }
 }
 
@@ -218,7 +215,7 @@ void viewFarmers()
             printf("Username: %s\n", u.username);
             printf("Phone Number: %s\n", u.phonenum);
 
-            printf("\t-----------------------------------------\n");
+            printf("\n-----------------------------------------\n");
 
         }
     }
@@ -248,7 +245,7 @@ void viewConsumers()
             printf("Username: %s\n", u.username);
             printf("Phone Number: %s\n", u.phonenum);
 
-            printf("\t-----------------------------------------\n");
+            printf("\n-----------------------------------------\n");
 
         }
     }

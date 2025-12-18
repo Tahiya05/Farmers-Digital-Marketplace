@@ -23,6 +23,5 @@ void viewTotalRevenue();
 void viewTopSellingProducts();
 void topFarmers();
 void topConsumers();
-void systemStats();
 
 #endif
