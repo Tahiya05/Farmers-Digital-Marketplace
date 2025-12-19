@@ -59,9 +59,10 @@ void farmerRegister()
 
     strcpy(u.phonenum, phone);
 
-    printf("\nYour username should not contain any space e.g. \"ShobujMia\"/\"Rafiq_Uddin\"");
-    printf("Enter Username: ");
-    scanf("%s",u.username);
+    printf("Enter your full name: ");
+    fgets(u.username,sizeof(u.username),stdin);
+
+    u.username[strcspn(u.username,'\n')]='\0';
 
     printf("Enter Password: ");
     scanf("%s",u.password);
@@ -89,25 +90,25 @@ int farmerLogin()
         printf("Error opening User File\n");
         return -1;
     }
-    char name[20],password[20];
+    char number[20],password[20];
     user u;
 
     printf("\t===== FARMER LOGIN =====\n");
 
-    printf("Enter Username: ");
-    scanf("%s",name);
+    printf("Enter Phonenumber: ");
+    scanf("%s",number);
 
     printf("Enter Password: ");
     scanf("%s", password);
 
     while(fread(&u, sizeof(user), 1, fp)){
-        if(u.type==1 && strcmp(u.username, name)==0 && strcmp(u.password,password)==0){
+        if(u.type==1 && strcmp(u.phonenum, number)==0 && strcmp(u.password,password)==0){
             printf("\nLogin Successful! Welcome %s (ID: %d)\n", u.username, u.id);
             fclose(fp);
             return u.id;
         }
     }
-    printf("\nInvalid username or password.\n");
+    printf("\nInvalid phonenumber or password.\n");
     fclose(fp);
     return -1;
 
