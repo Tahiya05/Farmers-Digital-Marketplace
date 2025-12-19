@@ -255,7 +255,7 @@
 
  void updateProduct(int farmerID)
  {
-     int targetID, found = 0;
+     int targetID, found = 0, choice;
      Product p;
 
      printf("\n===== UPDATE PRODUCT =====\n");
@@ -293,27 +293,50 @@
             printf("Quantity : %.2f\n", p.quantity);
             printf("Unit     : %s\n", p.unit);
 
-            printf("\nEnter New Price: ");
-            if (scanf("%f", &p.price) != 1) {
-                clearInputBuffer();
-                printf("Invalid price.\n");
-                fclose(fp);
-                fclose(temp);
-                remove("temp_products.txt");
-                return;
-            }
 
-            printf("Enter New Quantity: ");
-            if (scanf("%f", &p.quantity) != 1) {
+            printf("\nWhat do you want to update?\n");
+            printf("1. Price\n");
+            printf("2. Quantity\n");
+            printf("3. Both\n");
+            printf("Enter choice: ");
+
+            if (scanf("%d", &choice) != 1) {
                 clearInputBuffer();
-                printf("Invalid quantity.\n");
+                printf("Invalid choice.\n");
                 fclose(fp);
                 fclose(temp);
                 remove("temp_products.txt");
                 return;
             }
             clearInputBuffer();
+
+            if (choice == 1 || choice == 3) {
+                printf("Enter New Price: ");
+                if (scanf("%f", &p.price) != 1) {
+                    clearInputBuffer();
+                    printf("Invalid price.\n");
+                    fclose(fp);
+                    fclose(temp);
+                    remove("temp_products.txt");
+                    return;
+                }
+                clearInputBuffer();
+            }
+
+            if (choice == 2 || choice == 3) {
+                printf("Enter New Quantity (%s): ", p.unit);
+                if (scanf("%f", &p.quantity) != 1) {
+                    clearInputBuffer();
+                    printf("Invalid quantity.\n");
+                    fclose(fp);
+                    fclose(temp);
+                    remove("temp_products.txt");
+                    return;
+                }
+                clearInputBuffer();
+            }
         }
+
 
         fprintf(temp,
                 "%d|%d|%s|%s|%s|%.2f|%.2f\n",
