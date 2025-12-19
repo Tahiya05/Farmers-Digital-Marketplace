@@ -4,7 +4,6 @@
  #include "farmer.h"
 
 
-
  void clearInputBuffer(void)
  {
      int c;
@@ -119,7 +118,7 @@
      printf("\n===== ADD NEW PRODUCT =====\n");
 
      p.productID = getNewProductID();
-     strcpy(p.farmerID,farmerID);
+     p.farmerID = farmerID;
 
 
      printf("Enter Product Name (no commas): ");
@@ -230,7 +229,7 @@
      printf("\n===== MY PRODUCTS =====\n");
      printf("%-6s  %-30s  %-15s  %-8s  %-8s  %-8s\n", "ID", "Name", "Category", "Price", "Qty", "Unit");
 
-     printf("--------------------------------------------------------------------\n");
+     printf("-----------------------------------------------------------------------------------\n");
 
      while(fgets(line, sizeof(line), fp)){
             Product p;
@@ -240,7 +239,7 @@
 
             if(p.farmerID == farmerID){
                 found = 1;
-                printf("%-6d  %-30s  %-15s  %-8.2f  %-6.2f  %-8s\n",
+                printf("%-6d  %-30s  %-15s  %-8.2f  %-8.2f  %-8s\n",
                         p.productID, p.name, p.category, p.price, p.quantity, p.unit);
             }
         }
@@ -324,7 +323,7 @@
             }
 
             if (choice == 2 || choice == 3) {
-                printf("Enter New Quantity (%s): ", p.unit);
+                printf("Enter New Quantity in %s(float): ", p.unit);
                 if (scanf("%f", &p.quantity) != 1) {
                     clearInputBuffer();
                     printf("Invalid quantity.\n");
@@ -355,8 +354,11 @@
      remove(PRODUCT_FILE);
      rename("temp_products.txt", PRODUCT_FILE);
 
-     if (found)
+     if (found) {
          printf("\nProduct updated successfully!\n");
+         printf("ID: %d\nName: %s\nCategory: %s\nPrice: %0.2f per %s\nQuantity: %0.2f %s\n",
+               p.productID, p.name, p.category, p.price, p.unit, p.quantity, p.unit);
+     }
      else
          printf("\nProduct not found or not yours.\n");
 
@@ -387,17 +389,19 @@
      int found = 0;
      while(fgets(line, sizeof(line), fp)) {
             Product p;
-        if(sscanf(line, "%d|%d|%99[^|]|%39[^|]|%9[^|]|%f|%d|%d\n",
-                        &p.productID, &p.farmerID
+        if(sscanf(line, "%d|%d|%99[^|]|%39[^|]|%9[^|]|%f|%f\n",
+                        &p.productID, &p.farmerID,
                         p.name, p.category, p.unit,
                         &p.price, &p.quantity) == 7) {
 
           if(p.productID == id && p.farmerID == farmerID){
               found = 1;
+              printf("ID: %d\nName: %s\nCategory: %s\nPrice: %0.2f per %s\nQuantity: %0.2f %s\n",
+                      p.productID, p.name, p.category, p.price, p.unit, p.quantity, p.unit);
           }
           else{
             fprintf(temp, "%d|%d|%s|%s|%s|%0.2f|%0.2f\n",
-                          p.productID, p.farmerID
+                          p.productID, p.farmerID,
                           p.name, p.category, p.unit,
                           p.price, p.quantity);
           }
@@ -472,8 +476,8 @@
 
      if (!in || !out) {
             printf("File error.\n");
-            if (fp) fclose(fp);
-            if (temp) fclose(temp);
+            if(in) fclose(in);
+            if(out) fclose(out);
             return 0;
      }
 
@@ -522,7 +526,7 @@
     printf("\n===== ORDERS FOR YOUR PRODUCTS =====\n");
     printf("%-10s  %-12s  %-12s  %-8s  %-10s  %-12s\n",
            "OrderID", "ProductID", "ConsumerID", "Qty", "Total", "Status");
-    printf("------------------------------------------------------------------------------------\n");
+    printf("------------------------------------------------------------------------\n");
 
     while(fgets(line, sizeof(line), fp)) {
             Order o;
@@ -548,14 +552,25 @@
 
  }
 
- int approveOrder(int farmerID)
+ void approveOrder(int farmerID)
  {
      FILE *fp = fopen(ORDER_FILE, "r");
      FILE *temp = fopen("temp.txt", "w");
+     if (!fp || !temp) {
+         printf("File error.\n");
+         return;
+     }
 
-     int id;
+     int id, found = 0;
+
+     printf("\n===== APPROVE ORDER =====\n");
      printf("Enter Order ID to approve: ");
-     scanf("%d", &id);
+
+     if (scanf("%d", &id) != 1) {
+         clearInputBuffer();
+         printf("Invalid Order ID.\n");
+         return;
+     }
      clearInputBuffer();
 
      Order o;
@@ -566,7 +581,17 @@
           if (o.orderID == id && o.farmerID == farmerID &&
               strcmp(o.status, "Pending") == 0) {
 
+                found = 1;
                 strcpy(o.status, "Approved");
+
+                printf("\nOrder Approved Successfully!\n");
+                printf("----------------------------\n");
+                printf("Order ID    : %d\n", o.orderID);
+                printf("Product ID  : %d\n", o.productID);
+                printf("Quantity    : %.2f\n", o.quantity);
+                printf("Total Price : %.2f\n", o.totalPrice);
+                printf("Status      : %s\n", o.status);
+
                 updateProductQuantity(o.productID, o.quantity);
           }
 
@@ -580,16 +605,29 @@
      remove(ORDER_FILE);
      rename("temp.txt", ORDER_FILE);
 
+     if (!found)
+        printf("\nOrder not found, not yours, or already approved.\n");
+
  }
 
  void markOrderDelivered(int farmerID)
  {
      FILE *fp = fopen(ORDER_FILE, "r");
      FILE *temp = fopen("temp.txt", "w");
+     if (!fp || !temp) {
+         printf("File error.\n");
+         return;
+     }
 
-     int id;
+     int id, found = 0;
+
+     printf("\n===== MARK ORDER AS DELIVERED =====\n");
      printf("Enter Order ID to mark delivered: ");
-     scanf("%d", &id);
+     if (scanf("%d", &id) != 1) {
+         clearInputBuffer();
+         printf("Invalid Order ID.\n");
+         return;
+     }
      clearInputBuffer();
 
      Order o;
@@ -600,7 +638,16 @@
          if (o.orderID == id && o.farmerID == farmerID &&
              strcmp(o.status, "Approved") == 0) {
 
+                found = 1;
                 strcpy(o.status, "Delivered");
+
+                printf("\nOrder Marked as Delivered!\n");
+                printf("----------------------------\n");
+                printf("Order ID    : %d\n", o.orderID);
+                printf("Product ID  : %d\n", o.productID);
+                printf("Quantity    : %.2f\n", o.quantity);
+                printf("Total Price : %.2f\n", o.totalPrice);
+                printf("Status      : %s\n", o.status);
          }
 
          fprintf(temp, "%d|%d|%d|%d|%.2f|%.2f|%s\n",
@@ -612,5 +659,8 @@
      fclose(temp);
      remove(ORDER_FILE);
      rename("temp.txt", ORDER_FILE);
+
+     if (!found)
+        printf("\nOrder not found, not yours, or not approved yet.\n");
 
  }
