@@ -8,6 +8,11 @@
 
 #include "user.h"
 
+typedef struct {
+    int productID;
+    float quantitySold;
+} Sale;
+
 void adminDashboard();
 void adminExistence();
 int adminLogin();
@@ -20,8 +25,11 @@ void viewTransactions();
 void reportsMenu();
 void viewFailedAdminLogins();
 void viewTotalRevenue();
+void recordSale(int productID, float quantity);
+float getTotalSold(int productID);
 void viewTopSellingProducts();
 void topFarmers();
 void topConsumers();
+void systemStats();
 
 #endif

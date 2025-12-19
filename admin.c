@@ -5,11 +5,50 @@
 
 #include "admin.h"
 
+int main()
+{
+    adminExistence();
+
+    int choice;
+
+    while(1){
+        printf("\t====== FARMERS' DIGITAL MARKETPLACE ======\n");
+        printf("\nWELCOME to the marketplace!\n");
+        printf("\nWho are you?\n");
+        printf("1. Admin\n");
+        printf("2. Farmer\n");
+        printf("3. Consumer\n");
+        printf("4. Exit\n");
+        printf("======================================\n");
+        printf("Enter choice: ");
+        scanf("%d",&choice);
+
+        switch(choice){
+            case 1:
+                adminLogin();
+                break;
+            case 2:
+                farmerMenu();
+                break;
+            case 3:
+                consumerMenu();
+                break;
+            case 4:
+                return 0;
+            default:
+                printf("Invalid choice! Try again.\n");
+        }
+
+    }
+    return 0;
+}
+
 void adminDashboard()
 {
     int choice;
 
     while(1){
+        printf("\n");
         printf("\t====== ADMIN DASHBOARD ======\n");
         printf("1. View Farmers List\n");
         printf("2. View Consumers List\n");
@@ -17,7 +56,8 @@ void adminDashboard()
         printf("4. View Transactions\n");
         printf("5. Generate Reports\n");
         printf("6. View Failed Login Logs\n");
-        printf("7. Logout\n");
+        printf("7. System Statistics\n");
+        printf("8. Logout\n");
         printf("======================================\n");
         printf("Enter choice: ");
         scanf("%d",&choice);
@@ -42,6 +82,9 @@ void adminDashboard()
                 viewFailedAdminLogins();
                 break;
             case 7:
+                systemStats();
+                break;
+            case 8:
                 printf("Logging out...\n");
                 return;
             default:
@@ -56,6 +99,7 @@ void reportsMenu()
     int choice;
 
     while(1){
+        printf("\n");
         printf("\t====== Reports ======\n");
         printf("1. Total Revenue\n");
         printf("2. Top Selling Products\n");
@@ -70,15 +114,7 @@ void reportsMenu()
             case 1:
                 viewTotalRevenue();
                 break;
-            case 2:
-                viewTopSellingProducts();
-                break;
-            case 3:
-                topFarmers();
-                break;
-            case 4:
-                topConsumers();
-                break;
+
             case 5:
                 return;
             default:
@@ -96,8 +132,8 @@ void adminExistence()
             printf("Error!\n");
             return;
         }
-        user admin={1, "Admin", "01711234567", "admin@123", 0};
-        fwrite(&admin, sizeof(user), 1, fp);
+        User admin={1, "Admin", "01711234567", "admin@123", 0};
+        fwrite(&admin, sizeof(User), 1, fp);
 
         fclose(fp);
 
@@ -154,7 +190,7 @@ void logFailedAdminLogin(char username[])
 int adminLogin()
 {
     FILE *fp;
-    user u;
+    User u;
     char username[30],pass[20];
     int attempt =0;
     int found;
@@ -173,7 +209,7 @@ int adminLogin()
         printf("File not found\n");
         return 1;
         }
-        while (fread(&u, sizeof(user), 1, fp)){
+        while (fread(&u, sizeof(User), 1, fp)){
             if (u.type==0 && strcmp(u.username, username)==0 && strcmp(u.password, pass)==0){
             found=1;
             break;
@@ -183,6 +219,7 @@ int adminLogin()
         fclose(fp);
         if(found){
             printf("\n\nLogin successful!\n");
+            adminDashboard();
             return 0;
         }
         else {
@@ -203,16 +240,16 @@ void viewFarmers()
         printf("Error opening file.\n");
         return;
     }
-    user u;
+    User u;
     int found=0;
 
     printf("\t=====LIST OF FARMERS=====\n");
 
-    while(fread(&u, sizeof(user), 1, fp)){
+    while(fread(&u, sizeof(User), 1, fp)){
         if(u.type==1){
             found=1;
             printf("ID: %d\n", u.id);
-            printf("Username: %s\n", u.username);
+            printf("Name: %s\n", u.username);
             printf("Phone Number: %s\n", u.phonenum);
 
             printf("\n-----------------------------------------\n");
@@ -233,16 +270,16 @@ void viewConsumers()
         printf("Error opening User File\n");
         return;
     }
-    user u;
+    User u;
     int found=0;
 
     printf("\t=====LIST OF CONSUMERS=====\n");
 
-    while(fread(&u, sizeof(user), 1, fp)){
+    while(fread(&u, sizeof(User), 1, fp)){
         if(u.type==2){
             found=1;
             printf("ID: %d\n", u.id);
-            printf("Username: %s\n", u.username);
+            printf("Name: %s\n", u.username);
             printf("Phone Number: %s\n", u.phonenum);
 
             printf("\n-----------------------------------------\n");
@@ -256,28 +293,44 @@ void viewConsumers()
     fclose(fp);
 }
 
-void viewProducts()
+int loadProd(Product p[],int max)
 {
-    FILE *fp = fopen("products.txt","r");
+    FILE *fp=fopen("products.txt","r");
     if(fp==NULL){
-        printf("File missing\n.");
-        return 1;
+        printf("File missing.\n");
+        return 0;
     }
 
-    Product p;
-    int found=0;
+    int count=0;
+    char line[300];
 
-    printf("\t=====ALL PRODUCTS=====\n");
-    printf("ID\tName\tPrice\tQuantity\tCategory\n");
-
-    while(fscanf(fp, "%d \"%[^\"]\" %f %d \"%[^\"]\"",&p.productID, p.name, &p.price, &p.quantity, p.category)==5){
-        found=1;
-        printf"%d \t %s \t %.2f \t %d \t %s\n",p.productID, p.name, p.price, p.quantity, p.category);
-    }
-    if(!found){
-        printf("\nNo products available!\n");
+    while(fgets(line,sizeof(line),fp)&& count<max){
+        if(sscanf(line, "%d|%d|%99[^|]|%39[^|]|%9[^|]|%f|%f", &p[count].productID, &p[count].farmerID, p[count].name, p[count].category, p[count].unit,
+           &p[count].price, &p[count].quantity)==7){
+            count++;
+           }
     }
     fclose(fp);
+    return count;
+}
+
+void viewProducts()
+{
+    Product p[100];
+    int n = loadProd(p, 100);
+
+    if(n==0){
+        printf("\nNo products available!\n");
+        return;
+    }
+
+    printf("\t=====ALL PRODUCTS=====\n");
+    printf("ID\tName\t\tPrice\tQuantity\tUnit\tCategory\n");
+
+    for(int i=0;i<n;i++){
+        printf("%d\t%s\t%.2f\t%.2f\t%s\t%s\n", p[count].productID, p[count].name,
+                p[count].price, p[count].quantity,p[count].unit, p[count].category);
+    }
 }
 
 void viewTransactions()
@@ -351,4 +404,109 @@ void viewTotalRevenue()
     }
     printf("Total Revenue: %.2f Tk\n",revenue);
     fclose(fp);
+}
+
+void recordSale(int productID, float quantity)
+{
+    FILE *fp = fopen("sales.dat","ab");
+    if(fp==NULL){
+        printf("Error opening sales file!\n");
+        return;
+    }
+
+    Sale s;
+    s.productID = productID;
+    s.quantitySold = quantity;
+
+    fwrite(&s, sizeof(Sale), 1, fp);
+    fclose(fp);
+}
+
+float getTotalSold(int productID)
+{
+    FILE *fp = fopen("sales.dat","rb");
+    if(fp==NULL){
+        printf("File not found!\n");
+        return 0;
+    }
+
+    Sale s;
+    float total =0;
+
+    while(fread(&s, sizeof(Sale),1,fp)){
+        if(s.productID==productID){
+            total+=s.quantitySold;
+        }
+    }
+
+    fclose(fp);
+    return total;
+}
+
+void systemStats()
+{
+    Product p[100];
+    int n = loadProd(p, 100);
+
+    if(n==0){
+        printf("\nNo products available!\n");
+        return;
+    }
+
+    FILE *fp=fopen("users.dat", "rb");
+    if(fp==NULL){
+        printf("Error opening user file.\n");
+        return;
+    }
+
+    User u;
+    int totalfarmers=0, totalconsumers=0;
+
+    while(fread(&u, sizeof(User), 1, fp)){
+        if(u.type==1) totalfarmers++;
+        else if(u.type==1) totalconsumers++;
+    }
+    fclose(fp);
+
+    FILE *fs = fopen("sales.dat","rb");
+    if(fs==NULL){
+        printf("File not found!\n");
+        return;
+    }
+    float totalSold=0;
+
+    Sale s;
+
+    if(fs != NULL) {
+        while(fread(&s, sizeof(Sale), 1, fs)){
+            totalSold +=s.quantitySold;
+        }
+        fclose(fs);
+    }
+
+    int maxIndex = -1;
+    float maxSold = 0;
+
+    for(int i=0; i<n; i++){
+        float sold = getTotalSold(p[i].productID);
+        if(sold>maxSold){
+            maxSold = sold;
+            maxIndex = i;
+        }
+    }
+
+    printf("\t===== SYSTEM STATISTICS =====\n");
+    printf("Total Products      : %d\n", n);
+    printf("Total Farmers       : %d\n", totalfarmers);
+    printf("Total Consumers     : %d\n", totalconsumers);
+    printf("Total Quantity Sold : %.2f units\n", totalSold);
+
+    if(maxIndex != -1){
+        printf("\nTop-Selling Product:\n");
+        printf("Product ID   : %d\n",p[maxIndex].productID);
+        printf("Name         : %s\n",p[maxIndex].name);
+        printf("Category     : %s\n",p[maxIndex].category);
+        printf("Sold Quantity: %.2f %s\n",maxSold,p[maxIndex].unit);
+    }
+    else printf("\nNo sales recorded yet.\n");
 }
