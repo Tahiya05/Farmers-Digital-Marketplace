@@ -29,6 +29,17 @@ typedef struct{
     float price;
 }CartItem;
 
+typedef struct {
+    int orderID;
+    int productID;
+    int farmerID;
+    int consumerID;
+    char name[50];
+    float quantity;
+    float totalPrice;
+    char status[15];
+} Order;
+
 typedef  struct{
     int ordrId;
     int productId;
@@ -43,86 +54,63 @@ typedef  struct{
 CartItem cart[MAX_CART];
 int cartCount=0;
 
+void consumerMenu();
 void signup();
-int login(char loggeduser[]);
-int loadProd(Product item[]);
-void viewProd(Product item[],int n);
-void viewCtg(Product item[],int n);
-void searchProd(Product item[],int n);
-void addCart(Product item[],int n);
+int consumerLogin();
+void consumerDashboard(int consumerID);
+void viewProducts(Product item[],int n);
+void viewByCategory(Product item[],int n);
+void searchProduct(Product item[],int n);
+void addToCart(Product item[],int n);
 int transactionID();
-int placeOrdr(char customer[],Product item[],int n);
-void ordrHis(char customer[]);
-void feedback(char customer[]);
+int placeOrder(int consumerID,Product item[],int n);
+void orderHistory(int consumerID);
+void feedback(int consumerID);
 
 
 
-int main(){
-
-    Product item[MAX_PRODUCTS];
-    int n;
-    char customer[50];
-
+void consumerMenu()
+{
      printf("\n                              WELCOME TO YOUR GO-TO DESTINATION FOR FRESH GROCERIES!!!");
      printf("\n                              ________________________________________________________");
-     printf("\n\n>> CHOOSE WHAT TO DO:\n\n");
-     int choice1;
-     do{
-        printf("\n>>MAIN MENU<<\n");
-        printf("\n1.Sign Up\n2.Log In\n3.Exit\n\nEnter Your Choice: ");
-        if(scanf("%d",&choice1)!=1){
-            while(getchar()!='\n');
-            printf("Invalid Input. Try again.\n");
-            continue;
+
+     int choice;
+
+     while(1){
+        printf("\n");
+        printf("\t====== WELCOME! ======\n");
+        printf("What would you like to do?\n");
+        printf("1. Sign up\n");
+        printf("2. Login\n");
+        printf("3. Back\n");
+        printf("======================================\n");
+        printf("Enter choice: ");
+        scanf("%d",&choice);
+
+
+        switch(choice){
+            case 1: signup();
+                break;
+            case 2: consumerLogin();
+                break;
+            case 3:
+                return;
+            default: printf("\nInvalid choice! Try again.\n");
+                break;
         }
+    }
+}
 
-        if(choice1==1){
-            int sch;
-            printf("\n>>SIGN UP: \n");
-            printf("\n1. Create Account\n");
-            printf("2.Back to Main Menu\n");
-            printf("\nEnter Choice: \n");
-            if(scanf("%d",&sch)!=1){
-                while(getchar()!='\n');
-                printf("Invalid Input!\n");
-                continue;
-            }
+void consumerDashboard(int consumerID)
+{
+     Product item[MAX_PRODUCTS];
+     int n;
 
-            if(sch==1){
-                signup();
-            }
-            else if(sch==2){
-                continue;
-            }
-            else{
-                printf("Invalid Choice! Returning To Main Menu...\n");
-                continue;
-            }
+     n=loadProducts(item, 300);
 
-      }
-        else if(choice1==2){
-                int lch;
-            printf("\n>>LOGIN: \n");
-            printf("\n1.Log in your account.\n");
-            printf("2.Back to Main Menu\n");
-            printf("\nEnter Choice: \n");
-            if(scanf("%d",&lch)!=1){
-                while(getchar()!='\n');
-                printf("Invalid Input!\n");
-                continue;
-            }
-
-            if(lch==1){
-                if(login(customer)){
-                n=loadProd(item);
-                if(n==0){
-                    printf("Oops! No Products Available.");
-                    continue;
-            }
-
-        int choice2;
+     int choice2;
         do{
-        printf("\n>>DASHBOARD<<\n");
+        printf("\t====== DASHBOARD ======\n");
         printf("\n1.View All Products\n");
         printf("2.View by Categories\n");
         printf("3.Search Products\n");
@@ -141,71 +129,42 @@ int main(){
 
         switch(choice2){
          case 1:
-            viewProd(item,n);
-            break;
+             viewProducts(item,n);
+             break;
          case 2:
              printf("\nCHOOSE: \n");
-            viewCtg(item,n);
-            break;
+             viewByCategory(item,n);
+             break;
          case 3:
-             searchProd(item,n);
+             searchProduct(item,n);
              break;
          case 4:
-            addCart(item,n);
-            break;
+             addToCart(item,n);
+             break;
          case 5:
-             placeOrdr(customer,item,n);
+             placeOrder(consumerID,item,n);
              break;
          case 6:
-            ordrHis(customer);
-            break;
+             orderHistory(consumerID);
+             break;
          case 7:
-             feedback(customer);
+             feedback(consumerID);
              break;
          case 8:
              printf("Thank You For Visiting!!");
-             break;
+             return;
          default:
-            printf("Invalid Choice!\n\n");
-            break;
-     }
+             printf("Invalid Choice!\n\n");
+             break;
+        }
 
-     }while(choice2!=8);
-   }
+    }while(choice2!=8);
 
-    }
-
-    else if(lch==2){
-                continue;
-            }
-            else{
-                printf("Invalid Choice! Returning To Main Menu...\n");
-                continue;
-            }
-    }
-
-    else if(choice1==3){
-        printf("\nThank you for visiting!\n");
-        break;
-    }
-
-    else{
-        printf("Invalid Choice! Try Again.\n");
-    }
-
-}while(choice1!=3);
-
-return 0;
 }
-
-
-
-
-
 
 void signup(){
 
-    FILE *fp=fopen("users.dat","ab+");
+    FILE *fp=fopen("consumers.dat","ab+");
 
     if(fp==NULL){
         printf("Error opening file.\n");
@@ -215,7 +174,7 @@ void signup(){
     User c,temp;
     char phone[12];
 
-    printf("\t>>>SIGN UP TO EMBARK ON THE JOURNEY!<<<\n");
+    printf("\t===== SIGN UP TO EMBARK ON THE JOURNEY! =====\n");
     printf("Enter Your Phone Number: ");
     scanf("%11s",&phone);
 
@@ -231,7 +190,6 @@ void signup(){
 
     strcpy(c.phonenum,phone);
 
-    printf("\nUsername must have no space; eg: 'abcdefgh','abcd_efgh'\n");
     printf("Enter Full Name: ");
     getchar();
     fgets(c.username,sizeof(c.username),stdin);
@@ -240,8 +198,8 @@ void signup(){
     printf("Enter Password: ");
     scanf("%29s",c.password);
 
-    c.type=1;
-    c.id=10001;
+    c.type=2;
+    c.id=20001;
 
     rewind(fp);
     while(fread(&temp,sizeof(User),1,fp)){
@@ -257,9 +215,9 @@ void signup(){
 
 }
 
-int login(char loggeduser[]){
+int consumerLogin(){
 
-    FILE *fp=fopen("users.dat","rb");
+    FILE *fp=fopen("consumers.dat","rb");
     if(fp==NULL){
         printf("\nOops! File Not Found!\n");
         return -1;
@@ -268,7 +226,7 @@ int login(char loggeduser[]){
     User c;
     char n[30],p[30];
 
-    printf("\t>>LOGIN: \n");
+    printf("\t===== LOGIN =====\n");
     printf("Phone Number: ");
     scanf("%29s",n);
     printf("Password: ");
@@ -277,47 +235,29 @@ int login(char loggeduser[]){
 
     while(fread(&c,sizeof(User),1,fp)){
         if(c.type==1 && strcmp(c.phonenum,n)==0 && strcmp(c.password,p)==0){
-            strcpy(loggeduser,c.username);
             fclose(fp);
             printf("\nLogin Successful!\nWelcome %s (ID: %d)\n",c.username,c.id);
+            consumerDashboard(c.id);
             return c.id;
         }
     }
 
-    fclose(fp);
-
     printf("\nInvalid Phone Number or Password!\n");
-
+    fclose(fp);
     return -1;
 }
 
-int loadProd(Product item[]){
-    FILE *fp=fopen("products.txt","r");
-    if(fp==NULL){
-        printf("Error. File Not Found.\n");
-        return 0;
-    }
-
-    int count=0;
-    while(count<MAX_PRODUCTS && fscanf(fp,"%d %99s %49s %f %d",&item[count].ProductID,item[count].name,item[count].category,&item[count].price,&item[count].quantity)==5){
-        count++;
-    }
-    fclose(fp);
-    return count;
-}
-
-
-void viewProd(Product item[],int n){
+void viewProducts(Product item[],int n){
 
     printf("\nNote: #Vegetables, Fruits, Grains, Meat, And Fish Are Measured In Kilograms\n#Dairy Products Are Measured In Liters (Liquid Items) or Gram\n#Spices Are Measured In Grams\n");
     printf("\nALL PRODUCTS:\n");
     for(int i=0;i<n;i++){
             printf("\n%d.%s \n(Category:%s)\n->BDT %.2f\nStock:%d\n",
-                   item[i].ProductID,item[i].name,item[i].category,item[i].price,item[i].quantity);
+                   item[i].productID,item[i].name,item[i].category,item[i].price,item[i].quantity);
     }
 }
 
-void viewCtg(Product item[],int n){
+void viewByCategory(Product item[],int n){
      char cat[30];
        printf("\nNote: #Vegetables, Fruits, Grains, Meat, And Fish Are Measured In Kilograms\n#Dairy Products Are Measured In Liters (Liquid Items) or Gram\n#Spices Are Measured In Grams\n");
        printf("Choose Category: \n");
@@ -330,7 +270,7 @@ void viewCtg(Product item[],int n){
        int found=0;
        for(int i=0;i<n;i++){
         if(strcmp(item[i].category,cat)==0){
-            printf("\n%d.%s->BDT %.2f\nStock: %d\n",item[i].ProductID,item[i].name,item[i].price,item[i].quantity);
+            printf("\n%d.%s->BDT %.2f\nStock: %d\n",item[i].productID,item[i].name,item[i].price,item[i].quantity);
             found=1;
          }
        }
@@ -342,7 +282,7 @@ void viewCtg(Product item[],int n){
 }
 
 
-void searchProd(Product item[],int n){
+void searchProduct(Product item[],int n){
     char srch[50];
     char tmp[50];
     printf("Search The Product Name: ");
@@ -360,7 +300,7 @@ void searchProd(Product item[],int n){
             strlwr(tmp);
 
         if(strstr(tmp,srch)!=NULL){
-            printf("%d.\t%s\t%.2f\t%d\t%s\n",item[i].ProductID,item[i].name,item[i].price,item[i].quantity,item[i].category);
+            printf("%d.\t%s\t%.2f\t%d\t%s\n",item[i].productID,item[i].name,item[i].price,item[i].quantity,item[i].category);
             found=1;
         }
     }
@@ -371,7 +311,7 @@ void searchProd(Product item[],int n){
     }
 }
 
-void addCart(Product item[],int n){
+void addToCart(Product item[],int n){
     char name[50], tmp[50];
     int qty;
 
@@ -424,7 +364,7 @@ void addCart(Product item[],int n){
 int transactionID(){
    FILE *fp=fopen("transaction.txt","r");
    if(!fp)
-    return 1001;
+   return 1001;
 
    int lastID=1000, id, qty;
    float price, total;
@@ -437,7 +377,7 @@ int transactionID(){
    return lastID+1;
 }
 
-int placeOrdr(char customer[],Product item[],int n)
+int placeOrder(int consumerID,Product item[],int n)
 {
     if(cartCount==0){
         printf("Cart is empty!\n");
@@ -451,19 +391,19 @@ int placeOrdr(char customer[],Product item[],int n)
     }
 
     for(int i=0;i<cartCount;i++){
-        Transaction t;
-        t.ordrId=transactionID();
+        Order o;
+        o.orderId=transactionID();
 
-        t.productId=0;
-        t.buyerId=0;
+        o.productId=0;
+        o.consumerID=0;
 
-        strcpy(t.customer,customer);
-        strcpy(t.product,cart[i].product);
-        t.quantity=cart[i].quantity;
-        t.price=cart[i].price;
-        t.total=t.price*t.quantity;
+        o.customer=(consumerID);
+        strcpy(o.product,cart[i].product);
+        o.quantity=cart[i].quantity;
+        o.price=cart[i].price;
+        o.total=t.price*t.quantity;
 
-        fprintf(fp,"%d %s %s %d %.2f %.2f\n",t.ordrId,t.customer,t.product,t.quantity,t.price,t.total);
+        fprintf(fp,"%d %s %s %d %.2f %.2f\n",t.orderId,t.consumerID,t.product,t.quantity,t.price,t.total);
         for(int j=0;j<n;j++){
             if(strcmp(item[j].name,t.product)==0){
                 item[j].quantity=item[j].quantity-t.quantity;
@@ -471,7 +411,7 @@ int placeOrdr(char customer[],Product item[],int n)
             }
         }
 
-        printf("\nOrder Placed: %s\nQuantity: %d\nTotal: %.2f\nID: %d\n",t.product,t.quantity,t.total,t.ordrId);
+        printf("\nOrder Placed: %s\nQuantity: %d\nTotal: %.2f\nID: %d\n",t.product,t.quantity,t.total,t.orderId);
     }
 
     fclose(fp);
@@ -485,7 +425,7 @@ int placeOrdr(char customer[],Product item[],int n)
     }
 
     for(int i=0;i<n;i++){
-        fprintf(fp2,"%d %s %.2f %d %s\n",item[i].ProductID,item[i].name,item[i].price,item[i].quantity,item[i].category);
+        fprintf(fp2,"%d %s %.2f %d %s\n",item[i].productID,item[i].name,item[i].price,item[i].quantity,item[i].category);
     }
         fclose(fp2);
 
@@ -493,7 +433,7 @@ int placeOrdr(char customer[],Product item[],int n)
         return 1;
 }
 
-void ordrHis(char customer[]){
+void orderHistory(int consumerID){
      FILE *fp=fopen("transaction.txt","r");
      if(fp==NULL){
         printf("No Transactions Found.\n");
@@ -520,7 +460,7 @@ void ordrHis(char customer[]){
 }
 
 
-void feedback(char customer[]){
+void feedback(int consumerID){
     char cmnt[200];
     printf("Write Your Feedback: ");
     getchar();
@@ -538,4 +478,3 @@ void feedback(char customer[]){
 
     printf("\nThank You For Your Feedback!\n");
 }
-
