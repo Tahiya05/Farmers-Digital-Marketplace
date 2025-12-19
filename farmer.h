@@ -1,12 +1,16 @@
 #ifndef FARMER_H
 #define FARMER_H
 
+#include<stdio.h>
+
 #define PRODUCT_FILE "products.txt"
 #define ORDER_FILE   "orders.txt"
 #define NOTIFY_FILE  "notifications.txt"
 
 
 #define CATEGORY_COUNT 9
+#define UNIT_COUNT 4
+
 static const char
 *CATEGORIES[CATEGORY_COUNT] = {
     "Vegetable",
@@ -20,36 +24,47 @@ static const char
     "Others"
 };
 
+static const char
+*UNITS[UNIT_COUNT] = {
+    "kg",
+    "g",
+    "liter",
+    "pcs"
+};
+
 typedef struct {
+    int id;
     char name[100];
-    char phone[20];
+    char phonenum[20];
     char password[20];
+    int type;
 } Farmer;
 
 typedef struct {
     int productID;
-    char productName[100];
-    char category[40];
-    float price;
-    int quantity;
     int farmerID;
+    char name[100];
+    char category[40];
+    char unit[10];
+    float price;
+    float quantity;
 } Product;
 
 typedef struct {
     int orderID;
     int productID;
-    char productName[100];
-    float price;
-    int quantity;
-    char consumerPhone[20];
     int farmerID;
+    int consumerID;
+    float quantity;
+    float totalPrice;
+    char status[15];
 } Order;
 
 typedef struct {
     int farmerID;
     int productID;
-    char productName[100];
-    char message[200];
+    char name[100];
+    char msg[200];
 } Notification;
 
 
@@ -59,19 +74,23 @@ void removeNewLine(char *str);
 int getNewProductID(void);
 
 
-void farmerDashboard(int farmerID);
-
 void addProduct(int farmerID);
 void viewMyProducts(int farmerID);
 void updateProduct(int farmerID);
 void deleteProduct(int farmerID);
 
 
-void viewOrders(int farmerID);
-int updateProductQuantity(int productID, int orderedQty);
-void notifyOutOfStock(int farmerID, const char productName[]);
-
-void addNotification(int farmerID, int productID, const char productName[], const char msg[]);
+int updateProductQuantity(int productID, float orderedQty);
+void notifyOutOfStock(int farmerID, const char *name, const char *msg);
+void addNotification(int farmerID, int productID, const char *name, const char *msg);
 void viewNotifications(int farmerID);
+
+
+void viewOrders(int farmerID);
+void approveOrder(int farmerID);
+void markOrderDelivered(int farmerID);
+
+
+void farmerDashboard(int farmerID);
 
 #endif
