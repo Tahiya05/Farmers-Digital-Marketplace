@@ -255,147 +255,95 @@
 
  void updateProduct(int farmerID)
  {
-     int targetID;
-     printf("Enter Product ID to update: ");
-     if(scanf("%d", &targetID) != 1) {
-        clearInputBuffer();
-        printf("Invalid ID.\n");
-        return;
-     }
+     int targetID, found = 0;
+     Product p;
 
+     printf("\n===== UPDATE PRODUCT =====\n");
+     printf("Enter Product ID to update: ");
+
+     if (scanf("%d", &targetID) != 1) {
+         clearInputBuffer();
+         printf("Invalid Product ID.\n");
+         return;
+     }
      clearInputBuffer();
 
-     FILE *fp = fopen(PRODUCT_FILE,"r");
-     if(fp == NULL) {
-       printf("No products in the file.\n");
-       return;
+     FILE *fp = fopen(PRODUCT_FILE, "r");
+     FILE *temp = fopen("temp_products.txt", "w");
+
+     if (fp == NULL || temp == NULL) {
+         printf("File error.\n");
+         if (fp) fclose(fp);
+         if (temp) fclose(temp);
+         return;
      }
 
-     Product *arr = NULL;
-     size_t count = 0, cap = 0;
-     char line[512];
+     while (fscanf(fp, "%d|%d|%99[^|]|%39[^|]|%9[^|]|%f|%f\n",
+                       &p.productID, &p.farmerID, p.name,
+                       p.category, p.unit, &p.price,
+                       &p.quantity) == 7) {
 
-     while(fgets(line, sizeof(line), fp)){
-        Product p;
-        if(sscanf(line, "%d|%99[^|]|%39[^|]|%f|%d|%d",
-                  &p.productID, p.productName, p.category,
-                  &p.price, &p.quantity, &p.farmerID) == 6) {
+        if (p.productID == targetID && p.farmerID == farmerID) {
+            found = 1;
 
-                    if(count >= cap) {
-                        cap = cap == 0 ? 64 : cap * 2;
-                        arr = realloc(arr, cap * sizeof(Product));
+            printf("\nCurrent Details:\n");
+            printf("Name     : %s\n", p.name);
+            printf("Category : %s\n", p.category);
+            printf("Price    : %.2f\n", p.price);
+            printf("Quantity : %.2f\n", p.quantity);
+            printf("Unit     : %s\n", p.unit);
 
-                        if(!arr) {
-                            fclose(fp);
-                            printf("Memory error.\n");
-                            return;
-                        }
-                   }
-                    arr[count++] = p;
+            printf("\nEnter New Price: ");
+            if (scanf("%f", &p.price) != 1) {
+                clearInputBuffer();
+                printf("Invalid price.\n");
+                fclose(fp);
+                fclose(temp);
+                remove("temp_products.txt");
+                return;
             }
+
+            printf("Enter New Quantity: ");
+            if (scanf("%f", &p.quantity) != 1) {
+                clearInputBuffer();
+                printf("Invalid quantity.\n");
+                fclose(fp);
+                fclose(temp);
+                remove("temp_products.txt");
+                return;
+            }
+            clearInputBuffer();
+        }
+
+        fprintf(temp,
+                "%d|%d|%s|%s|%s|%.2f|%.2f\n",
+                p.productID,
+                p.farmerID,
+                p.name,
+                p.category,
+                p.unit,
+                p.price,
+                p.quantity);
      }
+
      fclose(fp);
+     fclose(temp);
 
-     int found = 0;
+     remove(PRODUCT_FILE);
+     rename("temp_products.txt", PRODUCT_FILE);
 
-     for(size_t i = 0; i < count; ++i){
-        if(arr[i].productID == targetId
-             &&
-           arr[i].farmerID == farmerID) {
-               found = 1;
-               printf("\n===== Current Product Details =====\n");
-               printf("Name : %s\n", arr[i].productName);
-               printf("Category : %s\n", arr[i].category);
-               printf("Price : %0.2f\n", arr[i].price);
-               printf("Quantity : %d\n", arr[i].quantity);
-
-
-               printf("\nEnter New Name (no commas): ");
-
-               if(!fgets(arr[i].productName, sizeof(arr[i].productName), stdin)) {}
-               removeNewLine(arr[i].productName);
-               if(strlen(arr[i].productName) == 0 || strchr(arr[i].productName, ',') != NULL) {
-                    printf("Invalid name. Aborting update.\n");
-                    free(arr);
-                    return;
-               }
-
-
-               printf("Select New Category: ");
-
-               for (int c = 0; c < CATEGORY_COUNT; ++c) {
-                    printf("%d. %s\n", c+1, CATEGORIES[c]);
-               }
-               printf("Enter choice (1-%d): ", CATEGORY_COUNT);
-
-               int ch;
-               if(scanf("%d", &ch) != 1) {
-                  clearInputBuffer();
-                  printf("Invalid input.\n");
-                  free(arr);
-                  return;
-               }
-               clearInputBuffer();
-
-               if(ch < 1 || ch > CATEGORY_COUNT) ch = CATEGORY_COUNT;
-               strncpy(arr[i].category, CATEGORIES[ch-1], sizeof(arr[i].category)-1);
-               arr[i].category[sizeof(arr[i].category)-1] = '\0';
-
-
-               printf("Enter New Price: ");
-
-               if(scanf("%f", &arr[i].price) != 1) {
-                    clearInputBuffer();
-                    printf("Invalid.\n");
-                    free(arr);
-                    return;
-               }
-               clearInputBuffer();
-
-
-               printf("Enter New Quantity: ");
-
-               if(scanf("%d\n", &arr[i].quantity) != 1) {
-                    clearInputBuffer();
-                    printf("Invalid.\n");
-                    free(arr);
-                    return;
-               }
-               clearInputBuffer();
-
-               break;
-           }
-     }
-
-     if(!found){
-        printf("Product not found OR not yours.\n");
-        free(arr);
-        return;
-     }
-
-     FILE *out = fopen(PRODUCT_FILE, "w");
-     if(out == NULL){
-        printf("Write Error.\n");
-        free(arr);
-        return;
-     }
-
-     for(size_t i = 0; i < count; ++i){
-        fprintf(out, "%d|%s|%s|%0.2f|%d|%d\n",
-                arr[i].productID, arr[i].productName, arr[i].category,
-                arr[i].price, arr[i].quantity, arr[i].farmerID);
-     }
-
-     fclose(out);
-     free(arr);
-
-     printf("\nProduct updated successfully!\n");
+     if (found)
+         printf("\nProduct updated successfully!\n");
+     else
+         printf("\nProduct not found or not yours.\n");
 
  }
 
  void deleteProduct(int farmerID)
  {
      int id;
+
+     printf("\n===== DELETE PRODUCT =====\n");
      printf("\nEnter Product ID to Delete: ");
      if(scanf("%d", &id) != 1) {
           clearInputBuffer();
@@ -416,28 +364,22 @@
      int found = 0;
      while(fgets(line, sizeof(line), fp)) {
             Product p;
-        if(sscanf(line, "%d|%99[^|]|%39[^|]|%f|%d|%d\n",
-                  &p.productID,
-                  p.productName,
-                  p.category,
-                  &p.price,
-                  &p.quantity,
-                  &p.farmerID) == 6) {
+        if(sscanf(line, "%d|%d|%99[^|]|%39[^|]|%9[^|]|%f|%d|%d\n",
+                        &p.productID, &p.farmerID
+                        p.name, p.category, p.unit,
+                        &p.price, &p.quantity) == 7) {
 
           if(p.productID == id && p.farmerID == farmerID){
-             found = 1;
+              found = 1;
           }
           else{
-            fprintf(temp, "%d|%s|%s|0.2%f|%d|%d\n",
-                    p.productID,
-                    p.productName,
-                    p.category,
-                    p.price,
-                    p.quantity,
-                    p.farmerID);
-           }
-        }
-     }
+            fprintf(temp, "%d|%d|%s|%s|%s|%0.2f|%0.2f\n",
+                          p.productID, p.farmerID
+                          p.name, p.category, p.unit,
+                          p.price, p.quantity);
+          }
+       }
+    }
 
      fclose(fp);
      fclose(temp);
@@ -464,12 +406,10 @@
 
  }
 
- void notifyOutOfStock(int farmerID, const char *name, const char *msg)
+ void notifyOutOfStock(int farmerID, const char *name)
  {
-     snprintf(msg, sizeof(msg), "Product '%s' is OUT OF STOCK.", name);
 
-     printf("\n[ALERT] %s\n", msg);
-     addNotification(farmerID, 0, name, msg);
+     addNotification(farmerID, 0, name, "Product is OUT OF STOCK");
 
  }
 
@@ -491,7 +431,7 @@
                         &n.farmerID, &n.productID, n.name, n.msg) == 4) {
                 if(n.farmerID == farmerID) {
                     found = 1;
-                    printf("- %s\n", msg);
+                    printf("\n[ALERT] %s: %s\n", n.name, n.msg);
                 }
           }
      }
@@ -502,63 +442,46 @@
 
  }
 
- int updateProductQuantity(int productID, int orderedQty)
+ int updateProductQuantity(int productID, float orderedQty)
  {
-     FILE *fp = fopen(PRODUCT_FILE, "r");
-     if(fp == NULL) return 0;
+     FILE *in = fopen(PRODUCT_FILE, "r");
+     FILE *out = fopen("temp.txt", "w");
 
-     Product *arr = NULL;
-     size_t count = 0, cap = 0;
-     char line[512];
-
-     while(fgets(line, sizeof(line), fp)) {
-        Product p;
-        if(sscanf(line, "%d|%99[^|]|%39[^|]|%f|%d|%d",
-                        &p.productID, p.productName, p.category,
-                        &p.price, &p.quantity, &p.farmerID) == 6) {
-                if(count >= cap) {
-                    cap = cap == 0 ? 64 : cap * 2;
-                    arr = realloc(arr, cap * sizeof(Product));
-                    if(!arr) {
-                        fclose(fp);
-                        return 0;
-                    }
-                }
-                arr[count++] = p;
-          }
+     if (!in || !out) {
+            printf("File error.\n");
+            if (fp) fclose(fp);
+            if (temp) fclose(temp);
+            return 0;
      }
-     fclose(fp);
 
-     int found = 0;
-     for(size_t i = 0; i < count; ++i) {
-        if(arr[i].productID == productID) {
-            found = 1;
-            arr[i].quantity -= orderedQty;
-          if(arr[i].quantity <= 0) {
-                arr[i].quantity = 0;
-                notifyOutOfStock(arr[i].farmerID, arr[i].productName);
-           }
-          break;
+     Product p;
+     int updated = 0;
+
+
+     while (fscanf(in, "%d|%d|%99[^|]|%39[^|]|%9[^|]|%f|%f\n",
+           &p.productID, &p.farmerID, p.name,
+           p.category, p.unit, &p.price, &p.quantity) == 7) {
+
+        if (p.productID == productID) {
+            p.quantity -= orderedQty;
+            if (p.quantity <= 0) {
+                p.quantity = 0;
+                notifyOutOfStock(p.farmerID, p.name);
+            }
+            updated = 1;
         }
-     }
-     if(!found) {
-        free(arr);
-        return 0;
-     }
 
-     FILE *out = fopen(PRODUCT_FILE, "w");
-     if(!out) {
-        free(arr);
-        return 0;
-     }
-     for(size_t i = 0; i < count; ++i) {
-        fprintf(out, "%d|%s|%s|%0.2f|%d|%d\n",
-                     arr[i].productID, arr[i].productName, arr[i].category,
-                     arr[i].price, arr[i].quantity, arr[i].farmerID);
-     }
-     fclose(out);
-     free(arr);
-     return 1;
+        fprintf(out, "%d|%d|%s|%s|%s|%.2f|%.2f\n",
+                p.productID, p.farmerID, p.name,
+                p.category, p.unit, p.price, p.quantity);
+    }
+     fclose(in);
+    fclose(out);
+
+    remove(PRODUCT_FILE);
+    rename("temp.txt", PRODUCT_FILE);
+
+    return updated;
 
  }
 
@@ -605,4 +528,66 @@
  int approveOrder(int farmerID)
  {
      FILE *fp = fopen(ORDER_FILE, "r");
+     FILE *temp = fopen("temp.txt", "w");
+
+     int id;
+     printf("Enter Order ID to approve: ");
+     scanf("%d", &id);
+     clearInputBuffer();
+
+     Order o;
+     while (fscanf(fp, "%d|%d|%d|%d|%f|%f|%14[^\n]\n",
+                      &o.orderID, &o.productID, &o.farmerID,
+                      &o.consumerID, &o.quantity, &o.totalPrice, o.status) == 7) {
+
+          if (o.orderID == id && o.farmerID == farmerID &&
+              strcmp(o.status, "Pending") == 0) {
+
+                strcpy(o.status, "Approved");
+                updateProductQuantity(o.productID, o.quantity);
+          }
+
+          fprintf(temp, "%d|%d|%d|%d|%.2f|%.2f|%s\n",
+                        o.orderID, o.productID, o.farmerID,
+                        o.consumerID, o.quantity, o.totalPrice, o.status);
+     }
+
+     fclose(fp);
+     fclose(temp);
+     remove(ORDER_FILE);
+     rename("temp.txt", ORDER_FILE);
+
+ }
+
+ void markOrderDelivered(int farmerID)
+ {
+     FILE *fp = fopen(ORDER_FILE, "r");
+     FILE *temp = fopen("temp.txt", "w");
+
+     int id;
+     printf("Enter Order ID to mark delivered: ");
+     scanf("%d", &id);
+     clearInputBuffer();
+
+     Order o;
+     while (fscanf(fp, "%d|%d|%d|%d|%f|%f|%14[^\n]\n",
+                       &o.orderID, &o.productID, &o.farmerID,
+                       &o.consumerID, &o.quantity, &o.totalPrice, o.status) == 7) {
+
+         if (o.orderID == id && o.farmerID == farmerID &&
+             strcmp(o.status, "Approved") == 0) {
+
+                strcpy(o.status, "Delivered");
+         }
+
+         fprintf(temp, "%d|%d|%d|%d|%.2f|%.2f|%s\n",
+                        o.orderID, o.productID, o.farmerID,
+                        o.consumerID, o.quantity, o.totalPrice, o.status);
+     }
+
+     fclose(fp);
+     fclose(temp);
+     remove(ORDER_FILE);
+     rename("temp.txt", ORDER_FILE);
+
  }

@@ -81,7 +81,7 @@ void deleteProduct(int farmerID);
 
 
 int updateProductQuantity(int productID, float orderedQty);
-void notifyOutOfStock(int farmerID, const char *name, const char *msg);
+void notifyOutOfStock(int farmerID, const char *name);
 void addNotification(int farmerID, int productID, const char *name, const char *msg);
 void viewNotifications(int farmerID);
 
