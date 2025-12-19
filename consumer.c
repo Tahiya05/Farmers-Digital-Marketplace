@@ -14,11 +14,13 @@ typedef struct{
 }User;
 
 typedef struct{
-     int id;
+     int ProductID;
+     int farmerID;
      char name[100];
+     char category[40];
+     char unit [10];
      float price;
-     int quantity;
-     char category[100];
+     float quantity;
 }Product;
 
 typedef struct{
@@ -297,7 +299,7 @@ int loadProd(Product item[]){
     }
 
     int count=0;
-    while(count<MAX_PRODUCTS && fscanf(fp,"%d %99s %f %d %99s",&item[count].id,item[count].name,&item[count].price,&item[count].quantity,item[count].category)==5){
+    while(count<MAX_PRODUCTS && fscanf(fp,"%d %99s %49s %f %d",&item[count].ProductID,item[count].name,item[count].category,&item[count].price,&item[count].quantity)==5){
         count++;
     }
     fclose(fp);
@@ -306,17 +308,20 @@ int loadProd(Product item[]){
 
 
 void viewProd(Product item[],int n){
+
+    printf("\nNote: #Vegetables, Fruits, Grains, Meat, And Fish Are Measured In Kilograms\n#Dairy Products Are Measured In Liters (Liquid Items) or Gram\n#Spices Are Measured In Grams\n");
     printf("\nALL PRODUCTS:\n");
     for(int i=0;i<n;i++){
-            printf("\n%d.%s->BDT %.2f\nStock:%d\nCatagory:%s\n",
-                   item[i].id,item[i].name,item[i].price,item[i].quantity,item[i].category);
+            printf("\n%d.%s \n(Category:%s)\n->BDT %.2f\nStock:%d\n",
+                   item[i].ProductID,item[i].name,item[i].category,item[i].price,item[i].quantity);
     }
 }
 
 void viewCtg(Product item[],int n){
      char cat[30];
+       printf("\nNote: #Vegetables, Fruits, Grains, Meat, And Fish Are Measured In Kilograms\n#Dairy Products Are Measured In Liters (Liquid Items) or Gram\n#Spices Are Measured In Grams\n");
        printf("Choose Category: \n");
-       printf("(Vegetable/Fruit/Grain/Dairy/Meat/Fish)\n");
+       printf("(Vegetable/Fruit/Grain/Dairy/Meat/Fish/Spices)\n");
 
        printf("Search: ");
        scanf("%99s",cat);
@@ -325,7 +330,7 @@ void viewCtg(Product item[],int n){
        int found=0;
        for(int i=0;i<n;i++){
         if(strcmp(item[i].category,cat)==0){
-            printf("\n%d.%s->BDT %.2f\nStock: %d\n",item[i].id,item[i].name,item[i].price,item[i].quantity);
+            printf("\n%d.%s->BDT %.2f\nStock: %d\n",item[i].ProductID,item[i].name,item[i].price,item[i].quantity);
             found=1;
          }
        }
@@ -346,6 +351,7 @@ void searchProd(Product item[],int n){
     strlwr(srch);
 
     int found=0;
+    printf("\nNote: #Vegetables, Fruits, Grains, Meat, And Fish Are Measured In Kilograms\n#Dairy Products Are Measured In Liters (Liquid Items) or Gram\n#Spices Are Measured In Grams\n");
     printf("\nSearch Results: \n");
     printf("ID\tName\tPrice\tQuantity\tCategory\n");
 
@@ -354,10 +360,12 @@ void searchProd(Product item[],int n){
             strlwr(tmp);
 
         if(strstr(tmp,srch)!=NULL){
-            printf("%d.\t%s\t%.2f\t%d\t%s\n",item[i].id,item[i].name,item[i].price,item[i].quantity,item[i].category);
+            printf("%d.\t%s\t%.2f\t%d\t%s\n",item[i].ProductID,item[i].name,item[i].price,item[i].quantity,item[i].category);
             found=1;
         }
     }
+
+
     if(found==0){
         printf("\nSorry, No Products Matched!\n");
     }
@@ -477,7 +485,7 @@ int placeOrdr(char customer[],Product item[],int n)
     }
 
     for(int i=0;i<n;i++){
-        fprintf(fp2,"%d %s %.2f %d %s\n",item[i].id,item[i].name,item[i].price,item[i].quantity,item[i].category);
+        fprintf(fp2,"%d %s %.2f %d %s\n",item[i].ProductID,item[i].name,item[i].price,item[i].quantity,item[i].category);
     }
         fclose(fp2);
 
