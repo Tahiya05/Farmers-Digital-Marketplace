@@ -446,6 +446,7 @@ int loadProducts(Product p[],int max)
     char line[300];
 
     while(fgets(line,sizeof(line),fp)&& count<max){
+            line[strcspn(line,"\n")]='\0';
         if(sscanf(line, "%d|%d|%99[^|]|%39[^|]|%9[^|]|%f|%f", &p[count].productID, &p[count].farmerID, p[count].name, p[count].category, p[count].unit,
            &p[count].price, &p[count].quantity)==7){
             count++;
@@ -711,7 +712,7 @@ void systemStats()
     }
 
     FILE *ff=fopen("consumers.dat", "rb");
-    if(fp==NULL){
+    if(ff==NULL){
         printf("Error opening consumer file.\n");
         return;
     }
@@ -1114,8 +1115,9 @@ void clearInputBuffer(void)
      printf("-----------------------------------------------------------------------------------\n");
 
      while(fgets(line, sizeof(line), fp)){
+            line[strcspn(line,"\n")]='\0';
             Product p;
-        if(sscanf(line, "%d|%d|%99[^|]|%39[^|]|%9[^|]|%f|%f\n",
+        if(sscanf(line, "%d|%d|%99[^|]|%39[^|]|%9[^|]|%f|%f",
                   &p.productID, &p.farmerID, p.name, p.category,
                    p.unit, &p.price, &p.quantity) == 7) {
 
@@ -1357,7 +1359,7 @@ void clearInputBuffer(void)
  int updateProductQuantity(int productID, float orderedQty)
  {
      FILE *in = fopen(PRODUCT_FILE, "r");
-     FILE *out = fopen("temp.txt", "w");
+     FILE *out = fopen("temp_products.txt", "w");
 
      if (!in || !out) {
             printf("File error.\n");
@@ -1375,12 +1377,19 @@ void clearInputBuffer(void)
            p.category, p.unit, &p.price, &p.quantity) == 7) {
 
         if (p.productID == productID) {
-            p.quantity -= orderedQty;
-            if (p.quantity <= 0) {
-                p.quantity = 0;
+                if(orderedQty > p.quantity){
+                    fclose(in);
+                    fclose(out);
+                    remove("temp_products.txt");
+                    return 0;
+                }
+                else{
+                 p.quantity -= orderedQty;
+            if (p.quantity == 0) {
                 notifyOutOfStock(p.farmerID, p.name);
             }
             updated = 1;
+          }
         }
 
         fprintf(out, "%d|%d|%s|%s|%s|%.2f|%.2f\n",
@@ -1390,8 +1399,13 @@ void clearInputBuffer(void)
      fclose(in);
     fclose(out);
 
+    if(updated){
     remove(PRODUCT_FILE);
-    rename("temp.txt", PRODUCT_FILE);
+    rename("temp_products.txt", PRODUCT_FILE);
+    }
+    else{
+        remove("temp_products.txt");
+    }
 
     return updated;
 
@@ -1440,7 +1454,7 @@ void clearInputBuffer(void)
  void approveOrder(int farmerID)
  {
      FILE *fp = fopen(ORDER_FILE, "r");
-     FILE *temp = fopen("temp.txt", "w");
+     FILE *temp = fopen("temp_orders.txt", "w");
      if (!fp || !temp) {
          printf("File error.\n");
          return;
@@ -1462,6 +1476,8 @@ void clearInputBuffer(void)
      while (fscanf(fp, "%d|%d|%d|%d|%99[^|]|%f|%f|%14[^\n]\n",
                       &o.orderID, &o.productID, &o.farmerID,
                       &o.consumerID, o.name, &o.quantity, &o.totalPrice, o.status) == 8) {
+
+            o.status[strcspn(o.status,"\n")]='\0';
 
           if (o.orderID == id && o.farmerID == farmerID &&
               strcmp(o.status, "Pending") == 0) {
@@ -1490,7 +1506,7 @@ void clearInputBuffer(void)
      fclose(fp);
      fclose(temp);
      remove(ORDER_FILE);
-     rename("temp.txt", ORDER_FILE);
+     rename("temp_orders.txt", ORDER_FILE);
 
      if (!found)
         printf("\nOrder not found, not yours, or already approved.\n");
@@ -1518,9 +1534,11 @@ void clearInputBuffer(void)
      clearInputBuffer();
 
      Order o;
-     while (fscanf(fp, "%d|%d|%d|%d|%99[^|]|%f|%f|%14[^\n]\n",
+     while (fscanf(fp, "%d|%d|%d|%d|%99[^|]|%f|%f|%14[^\n]",
                        &o.orderID, &o.productID, &o.farmerID,
                        &o.consumerID, o.name, &o.quantity, &o.totalPrice, o.status) == 8) {
+
+            o.status[strcspn(o.status,"\n")]='\0';
 
          if (o.orderID == id && o.farmerID == farmerID &&
              strcmp(o.status, "Approved") == 0) {
@@ -1717,15 +1735,19 @@ void consumerDashboard(int consumerID)
 
         switch(choice){
          case 1:
+             n=loadProducts(item, 300);
              viewProducts(item,n);
              break;
          case 2:
+             n=loadProducts(item, 300);
              viewByCategory(item,n);
              break;
          case 3:
+             n=loadProducts(item, 300);
              searchProduct(item,n);
              break;
          case 4:
+             n=loadProducts(item, 300);
              addToCart(item,n);
              break;
          case 5:
@@ -1870,7 +1892,15 @@ void addToCart(Product item[],int n){
      return;
     }
 
-    if(cartCount<=MAX_CART){
+    for(int i=0;i<cartCount; i++){
+        if(cart[i].productID==id){
+            cart[i].quantity=cart[i].quantity+qty;
+            printf("\nUpdated %s quantity in your cart.\n", item[index].name);
+            return;
+        }
+    }
+
+    if(cartCount<MAX_CART){
         cart[cartCount].productID=item[index].productID;
         cart[cartCount].farmerID=item[index].farmerID;
         strcpy(cart[cartCount].product,item[index].name);
@@ -1896,9 +1926,11 @@ int placeOrder(int consumerID,Product item[],int n)
         return 0;
     }
 
+    int orderID=getOrderID();
+
     for(int i=0;i<cartCount;i++){
         Order o;
-        o.orderID=getOrderID();
+        o.orderID=orderID++;
         o.consumerID=consumerID;
         o.productID=cart[i].productID;
         o.farmerID=cart[i].farmerID;
