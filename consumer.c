@@ -13,7 +13,11 @@ typedef struct{
 }User;
 
 typedef struct{
+<<<<<<< Updated upstream
      int ProductID;
+=======
+     int productID;
+>>>>>>> Stashed changes
      int farmerID;
      char name[100];
      char category[40];
@@ -23,8 +27,13 @@ typedef struct{
 }Product;
 
 typedef struct{
+<<<<<<< Updated upstream
     char product[50];
     int quantity;
+=======
+    char product[100];
+    float quantity;
+>>>>>>> Stashed changes
     float price;
 }CartItem;
 
@@ -33,12 +42,17 @@ typedef struct {
     int productID;
     int farmerID;
     int consumerID;
+<<<<<<< Updated upstream
     char name[50];
+=======
+    char name[100];
+>>>>>>> Stashed changes
     float quantity;
     float totalPrice;
     char status[15];
 } Order;
 
+<<<<<<< Updated upstream
 typedef  struct{
     int ordrId;
     int productId;
@@ -50,18 +64,27 @@ typedef  struct{
     float total;
 }Transaction;
 
+=======
+>>>>>>> Stashed changes
 CartItem cart[MAX_CART];
 int cartCount=0;
 
 void consumerMenu();
 void signup();
 int consumerLogin();
+<<<<<<< Updated upstream
+=======
+int getOrderID();
+>>>>>>> Stashed changes
 void consumerDashboard(int consumerID);
 void viewProducts(Product item[],int n);
 void viewByCategory(Product item[],int n);
 void searchProduct(Product item[],int n);
 void addToCart(Product item[],int n);
+<<<<<<< Updated upstream
 int getOrderID();
+=======
+>>>>>>> Stashed changes
 int placeOrder(int consumerID,Product item[],int n);
 void orderHistory(int consumerID);
 void feedback(int consumerID);
@@ -260,7 +283,11 @@ void consumerDashboard(int consumerID)
              break;
         }
 
+<<<<<<< Updated upstream
     }while(choice2!=8);
+=======
+    }while(choice!=8);
+>>>>>>> Stashed changes
 
 }
 
@@ -319,16 +346,25 @@ void searchProduct(Product item[],int n){
     strlwr(srch);
 
     int found=0;
+<<<<<<< Updated upstream
     printf("\nNote: #Vegetables, Fruits, Grains, Meat, And Fish Are Measured In Kilograms\n#Dairy Products Are Measured In Liters (Liquid Items) or Gram\n#Spices Are Measured In Grams\n");
     printf("\nSearch Results: \n");
     printf("ID\tName\tPrice\tQuantity\tCategory\n");
+=======
+    printf("\nSearch Results: \n");
+    printf("ID\tName\tPrice\tQuantity\tUnit\tCategory\n");
+>>>>>>> Stashed changes
 
     for(int i=0;i<n;i++){
             strcpy(tmp,item[i].name);
             strlwr(tmp);
 
         if(strstr(tmp,srch)!=NULL){
+<<<<<<< Updated upstream
             printf("%d.\t%s\t%.2f\t%d\t%s\n",item[i].productID,item[i].name,item[i].price,item[i].quantity,item[i].category);
+=======
+            printf("%d.\t%s\t%.2f\t.2f\t%s\t%s\n", item[i].productID, item[i].name, item[i].price, item[i].quantity, item[i].unit, item[i].category);
+>>>>>>> Stashed changes
             found=1;
         }
     }
@@ -340,6 +376,7 @@ void searchProduct(Product item[],int n){
 }
 
 void addToCart(Product item[],int n){
+<<<<<<< Updated upstream
     char name[50], tmp[50];
     int qty;
 
@@ -354,6 +391,24 @@ void addToCart(Product item[],int n){
 
         if(strcmp(tmp,name)==0){
             index=i;
+=======
+
+    int id, qty;
+
+    printf("Enter Product ID: ");
+    if(scanf("%d", &id)!=1){
+       while(getchar()!='\n');
+       printf("\nInvalid Input.\n");
+       return;
+   }
+
+
+
+    int index=-1;
+    for(int i=0;i<n;i++){
+        if(id == item[i].productID){
+            index = i;
+>>>>>>> Stashed changes
             break;
         }
     }
@@ -392,11 +447,19 @@ void addToCart(Product item[],int n){
 int placeOrder(int consumerID,Product item[],int n)
 {
     if(cartCount==0){
+<<<<<<< Updated upstream
         printf("Cart is empty!\n");
         return 0;
     }
 
     FILE *fp=fopen("transaction.txt","a");
+=======
+        printf("Cart is empty. Add To Your Cart First!\n");
+        return 0;
+    }
+
+    FILE *fp=fopen("order.txt","a");
+>>>>>>> Stashed changes
     if(fp==NULL){
         printf("Error Opening File!\n");
         return 0;
@@ -404,6 +467,7 @@ int placeOrder(int consumerID,Product item[],int n)
 
     for(int i=0;i<cartCount;i++){
         Order o;
+<<<<<<< Updated upstream
         o.orderId=transactionID();
 
         o.productId=0;
@@ -419,11 +483,31 @@ int placeOrder(int consumerID,Product item[],int n)
         for(int j=0;j<n;j++){
             if(strcmp(item[j].name,t.product)==0){
                 item[j].quantity=item[j].quantity-t.quantity;
+=======
+        o.orderID=getOrderID();
+
+        o.productID=0;
+        o.farmerID=0;
+
+        o.consumerID=consumerID;
+        strcpy(o.name, cart[i].product);
+        o.quantity=cart[i].quantity;
+        o.totalPrice=cart[i].price*o.quantity;
+
+        fprintf(fp,"%d|%d|%d|%d|%s|%.2f|%.2f|Pending\n", o.orderID, o.productID, o.farmerID, o.consumerID, o.name, o.quantity, o.totalPrice);
+        for(int j=0;j<n;j++){
+            if(strcmp(item[j].name,o.name)==0){
+                item[j]. quantity=item[j].quantity-t.quantity;
+>>>>>>> Stashed changes
                 break;
             }
         }
 
+<<<<<<< Updated upstream
         printf("\nOrder Placed: %s\nQuantity: %d\nTotal: %.2f\nID: %d\n",t.product,t.quantity,t.total,t.orderId);
+=======
+        printf("\nOrder Placed: %s\nQuantity: %0.2f\nTotal: %.2f\nID: %d\n", o.name, o.quantity, o.totalPrice, o.orderID);
+>>>>>>> Stashed changes
     }
 
     fclose(fp);
@@ -437,7 +521,11 @@ int placeOrder(int consumerID,Product item[],int n)
     }
 
     for(int i=0;i<n;i++){
+<<<<<<< Updated upstream
         fprintf(fp2,"%d %s %.2f %d %s\n",item[i].productID,item[i].name,item[i].price,item[i].quantity,item[i].category);
+=======
+        fprintf(fp2,"%d %s %.2f %.2f %s\n",item[i].productID,item[i].name,item[i].price,item[i].quantity,item[i].category);
+>>>>>>> Stashed changes
     }
         fclose(fp2);
 
@@ -446,12 +534,17 @@ int placeOrder(int consumerID,Product item[],int n)
 }
 
 void orderHistory(int consumerID){
+<<<<<<< Updated upstream
      FILE *fp=fopen("transaction.txt","r");
+=======
+     FILE *fp=fopen("orders.txt","r");
+>>>>>>> Stashed changes
      if(fp==NULL){
         printf("No Transactions Found.\n");
         return;
      }
 
+<<<<<<< Updated upstream
      int id,qty;
      float price,total;
      char c[50],p[100];
@@ -462,6 +555,30 @@ void orderHistory(int consumerID){
         if(strcmp(c,customer)==0){
             printf("\nID: %d\nItem: %s\nQuantity: %d\nTotal: %.2f\n",id,p,qty,total);
             found=1;
+=======
+     char line[512];
+     int found=0;
+
+     printf("\n===== YOUR ORDER HISTORY =====\n");
+     printf("%-10s  %-12s  %-30s  %-8s  %-10s  %-12s\n",
+           "OrderID", "ProductID", "Name", "Qty", "Total", "Status");
+     printf("------------------------------------------------------------------------------------\n");
+      while(fgets(line, sizeof(line), fp)) {
+            Order o;
+         if(sscanf(line, "%d|%d|%d|%d|%99[^|]|%f|%f|%14[^|]\n",
+                        &o.orderID, &o.productID, &o.farmerID,
+                        &o.consumerID, o.name, &o.quantity,
+                        &o.totalPrice, o.status) == 8) {
+           if(customerID==o.consumerID){
+              printf("\nID: %d\nItem: %s\nQuantity: %d\nTotal: %.2f\n",id,p,qty,total);
+              found=1;
+              printf("%-10d  %-12d  %-30s  %-8.2f  %-10.2f  %-12s\n",
+                        o.orderID, o.productID, o.name,
+                        o.quantity, o.totalPrice, o.status);
+
+           printf("----------------------------------------------------------------------\n");
+           }
+>>>>>>> Stashed changes
         }
      }
 
@@ -485,7 +602,11 @@ void feedback(int consumerID){
         return;
     }
     else
+<<<<<<< Updated upstream
     fprintf(fp,"%s: %s",customer,cmnt);
+=======
+    fprintf(fp,"%d: %s", consumerID, cmnt);
+>>>>>>> Stashed changes
     fclose(fp);
 
     printf("\nThank You For Your Feedback!\n");
