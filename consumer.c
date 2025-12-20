@@ -13,7 +13,7 @@ typedef struct{
 }User;
 
 typedef struct{
-     int ProductID;
+     int productID;
      int farmerID;
      char name[100];
      char category[40];
@@ -23,8 +23,8 @@ typedef struct{
 }Product;
 
 typedef struct{
-    char product[50];
-    int quantity;
+    char product[100];
+    float quantity;
     float price;
 }CartItem;
 
@@ -33,7 +33,7 @@ typedef struct {
     int productID;
     int farmerID;
     int consumerID;
-    char name[50];
+    char name[100];
     float quantity;
     float totalPrice;
     char status[15];
@@ -260,7 +260,7 @@ void consumerDashboard(int consumerID)
              break;
         }
 
-    }while(choice2!=8);
+    }while(choice!=8);
 
 }
 
@@ -319,73 +319,70 @@ void searchProduct(Product item[],int n){
     strlwr(srch);
 
     int found=0;
-    printf("\nNote: #Vegetables, Fruits, Grains, Meat, And Fish Are Measured In Kilograms\n#Dairy Products Are Measured In Liters (Liquid Items) or Gram\n#Spices Are Measured In Grams\n");
+
     printf("\nSearch Results: \n");
-    printf("ID\tName\tPrice\tQuantity\tCategory\n");
+    printf("ID\tName\tPrice\tQuantity\tUnit\tCategory\n");
 
     for(int i=0;i<n;i++){
             strcpy(tmp,item[i].name);
             strlwr(tmp);
 
-        if(strstr(tmp,srch)!=NULL){
-            printf("%d.\t%s\t%.2f\t%d\t%s\n",item[i].productID,item[i].name,item[i].price,item[i].quantity,item[i].category);
-            found=1;
+        if(strstr(tmp,srch)!= NULL){
+            printf("%d.\t%s\t%.2f\t%.2f\t%s\t%s\n", item[i].productID, item[i].name, item[i].price, item[i].quantity, item[i].unit, item[i].category);
+            found = 1;
         }
     }
 
 
-    if(found==0){
+    if(found == 0){
         printf("\nSorry, No Products Matched!\n");
     }
 }
 
-void addToCart(Product item[],int n){
-    char name[50], tmp[50];
-    int qty;
+void addToCart(Product item[], int n){
 
-    printf("Enter Product Name: ");
-    scanf("%49s",name);
+    int id, qty;
 
-    strlwr(name);
-    int index=-1;
-    for(int i=0;i<n;i++){
-            strcpy(tmp,item[i].name);
-            strlwr(tmp);
+    printf("Enter Product ID: ");
+    scanf("%d", &id);
 
-        if(strcmp(tmp,name)==0){
-            index=i;
+    int index = -1;
+    for(int i = 0; i < n; i++){
+        if(id == item[i].productID){
+            index = i;
             break;
         }
     }
 
-    if(index==-1){
+    if(index == -1){
         printf("Oops! Product Not Found!\n");
         return;
     }
 
     printf("Enter Quantity: ");
-   if(scanf("%d",&qty)!=1){
-    while(getchar()!='\n');
-    printf("\nInvalid Input.\n");
-    return;
-   }
+    if(scanf("%d", &qty)!= 1){
+        while(getchar() != '\n');
+        printf("\nInvalid Input.\n");
+        return;
+    }
+    getchar();
 
-   if(qty<=0){
-    printf("Quantity must be positive.\n");
-    return;
-   }
+    if(qty <= 0){
+        printf("Quantity must be positive.\n");
+        return;
+    }
 
-   if(qty>item[index].quantity){
-    printf("Oh, No~ Not Enough Stock!\n");
-    return;
-   }
+    if(qty > item[index].quantity){
+        printf("Oh, No~ Not Enough Stock!\n");
+        return;
+    }
 
-    strcpy(cart[cartCount].product,item[index].name);
-    cart[cartCount].price=item[index].price;
-    cart[cartCount].quantity=qty;
+    strcpy(cart[cartCount].product, item[index].name);
+    cart[cartCount].quantity = qty;
+    cart[cartCount].price = item[index].price;
     cartCount++;
 
-    printf("\n%s Added To Your Cart!\n",item[index].name);
+    printf("\n%s Added To Your Cart!\n", item[index].name);
 
 }
 
