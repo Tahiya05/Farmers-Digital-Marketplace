@@ -161,7 +161,7 @@ int consumerLogin(){
 
 
     while(fread(&c,sizeof(User),1,fp)){
-        if(c.type==1 && strcmp(c.phonenum,n)==0 && strcmp(c.password,p)==0){
+        if(c.type==2 && strcmp(c.phonenum,n)==0 && strcmp(c.password,p)==0){
             fclose(fp);
             printf("\nLogin Successful!\nWelcome %s (ID: %d)\n",c.username,c.id);
             consumerDashboard(c.id);
@@ -257,7 +257,7 @@ void viewProducts(Product item[], int n)
 {
     printf("\nALL PRODUCTS:\n");
     for(int i=0;i<n;i++){
-            printf("\n%d.%s \n(Category:%s)\n->BDT %.2f\nStock:%d %s\n",
+            printf("\n%d.%s \n(Category:%s)\n->BDT %.2f\nStock:%.2f %s\n",
                    item[i].productID, item[i].name, item[i].category, item[i].price, item[i].quantity, item[i].unit);
     }
 }
@@ -280,14 +280,14 @@ void viewByCategory(Product item[], int n)
        }
 
        strcpy(cate, CATEGORIES[ch-1]);
-       p.category[sizeof(p.category)-1] = '\0';
+       cate[sizeof(cate)-1] = '\0';
 
        printf("%s: \n", cate);
 
        int found=0;
        for(int i=0;i<n;i++){
          if(strcmp(item[i].category,cate)==0){
-            printf("\n%d. %s->BDT %.2f\nStock: %d %s\n",item[i].productID, item[i].name, item[i].price, item[i].quantity, item[i].unit);
+            printf("\n%d. %s->BDT %.2f\nStock: %.2f %s\n",item[i].productID, item[i].name, item[i].price, item[i].quantity, item[i].unit);
             found=1;
          }
        }
@@ -301,7 +301,7 @@ void viewByCategory(Product item[], int n)
 
 void searchProduct(Product item[],int n){
     char srch[50];
-    char tmp[50];
+    char temp[50];
     printf("Search The Product Name: ");
     scanf("%49s",srch);
 
@@ -312,10 +312,10 @@ void searchProduct(Product item[],int n){
     printf("ID\tName\tPrice\tQuantity\tUnit\tCategory\n");
 
     for(int i=0;i<n;i++){
-            strcpy(tmp,item[i].name);
-            strlwr(tmp);
+            strcpy(temp,item[i].name);
+            strlwr(temp);
 
-        if(strstr(tmp,srch) != NULL){
+        if(strstr(temp,srch) != NULL){
             printf("%d.\t%s\t%.2f\t.2f\t%s\t%s\n", item[i].productID, item[i].name, item[i].price, item[i].quantity, item[i].unit, item[i].category);
             found=1;
         }
@@ -338,8 +338,6 @@ void addToCart(Product item[],int n){
        return;
    }
 
-
-
     int index=-1;
     for(int i=0;i<n;i++){
         if(id == item[i].productID){
@@ -354,21 +352,21 @@ void addToCart(Product item[],int n){
     }
 
     printf("Enter Quantity in %s(float): ", item[index].unit);
-   if(scanf("%f",&qty)!=1){
-    while(getchar()!='\n');
-    printf("\nInvalid Input.\n");
-    return;
-   }
+    if(scanf("%f",&qty)!=1){
+     while(getchar()!='\n');
+     printf("\nInvalid Input.\n");
+     return;
+    }
 
-   if(qty<=0){
-    printf("Quantity must be positive.\n");
-    return;
-   }
+    if(qty<=0){
+     printf("Quantity must be positive.\n");
+     return;
+    }
 
-   if(qty>item[index].quantity){
-    printf("Oh, No~ Not Enough Stock!\n");
-    return;
-   }
+    if(qty>item[index].quantity){
+     printf("Oh, No~ Not Enough Stock!\n");
+     return;
+    }
 
     strcpy(cart[cartCount].product,item[index].name);
     cart[cartCount].price=item[index].price;
